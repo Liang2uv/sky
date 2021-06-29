@@ -80,7 +80,7 @@ function initPos() {
     pot[i] = {
       x: firstX + (i % 5) * span,
       y: firstY + Math.floor(i / 5) * span
-    }
+    };
   }
   toast('初始化按键坐标完毕');
   log(pot);
@@ -94,21 +94,28 @@ function musicSelect() {
     musicList = files.listDir('/sdcard/skyMusic/', function (name) {
       return name.endsWith('.txt') && files.isFile(files.join('/sdcard/skyMusic/', name));
     });
+    sort(musicList);
     if (musicList.length !== 0) {
       let musicIndex = dialogs.select('请选择乐谱', musicList);
       if (musicIndex >= 0) {
         musicName = musicList[musicIndex];
         if (files.isFile('/sdcard/skyMusic/' + musicName)) {
-          var readable = files.open('/sdcard/skyMusic/' + musicName, 'r', 'x-UTF-16LE-BOM');
-          var parsed = eval(readable.read())[0];
-          readable.close();
-          if(typeof(parsed.songNotes[0]) == 'number' || parsed.isEncrypted) {
+          try {
+            var readable = files.open('/sdcard/skyMusic/' + musicName, 'r', 'x-UTF-16LE-BOM');
+            var parsed = eval(readable.read())[0];
+            readable.close();
+            if(typeof(parsed.songNotes[0]) == 'number' || parsed.isEncrypted) {
+              musicRead = false;
+              alert('乐谱文件已加密，无法弹奏，请更换乐谱');
+            } else {
+              toast('读取乐谱成功');
+              musicJSON = parsed;
+              musicRead = true;
+            }
+          } catch (error) {
             musicRead = false;
-            alert('乐谱文件已加密，无法弹奏，请更换乐谱');
-          } else {
-            toast('读取乐谱成功');
-            musicJSON = parsed;
-            musicRead = true;
+            alert('读取乐谱失败，请更换乐谱文件');
+            log('读取乐谱失败，请更换乐谱文件');
           }
         } else {
           musicRead = false;
@@ -126,7 +133,7 @@ function musicSelect() {
   } else {
     musicRead = false;
     toast('skyMusic文件夹不存在');
-    log('skyMusic文件夹不存在')
+    log('skyMusic文件夹不存在');
     if (files.create('/sdcard/skyMusic/')) {
       alert('创建文件夹skyMusic成功，请将谱子放入该文件夹');
       log('创建文件夹skyMusic成功，请将谱子放入该文件夹');
@@ -175,4 +182,14 @@ function play() {
     }
   }
   log('弹奏完毕');
+}
+
+/**
+ * @method 数组排序（中文+英文）
+ * @param arr 需要排序的数组
+ */
+function sort(arr) {
+  arr.sort(function (item1, item2) {
+    return item1.localeCompare(item2, 'zh-CN');
+  });
 }
