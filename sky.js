@@ -33,21 +33,21 @@ if (!storage.contains(key_position)) {  // 没有自定义过按键坐标
 function customPosition() {
   floatWindow = floaty.window(
     <frame gravity="center">
-        <text id="text" bg="#999999">拖我</text>
     </frame>
   );
+  floatWindow.setPosition(770, 210);
   floatWindow.setAdjustEnabled(true);
   
-  alert('请在10秒内将悬浮窗拖动到第一个按键位置');
+  alert('请在10秒内将浮标拖动到第一个按键位置');
 
   t1 = setTimeout(function() {
     firstX = floatWindow.getX();
     firstY = floatWindow.getY();
-    alert('请在10秒内将悬浮窗拖动到第二个按键位置');
+    alert('请在10秒内将浮标拖动到第二个按键位置');
     t2 = setTimeout(function() {
       secondX = floatWindow.getX();
       secondY = floatWindow.getY();
-      span = Math.abs(secondY - firstY);
+      span = Math.abs(secondX - firstX);
       storage.put(key_position, { firstX: firstX, firstY: firstY, span: span });
       log({ firstX: firstX, firstY: firstY, secondX: secondX, secondY: secondY, span: span })
       floatWindow.close();
@@ -78,8 +78,8 @@ function runProgram() {
 function initPos() {
   for (let i = 0; i < 15; i++) {
     pot[i] = {
-      x: firstX - Math.floor(i / 5) * span,
-      y: firstY + (i % 5) * span
+      x: firstX + (i % 5) * span,
+      y: firstY + Math.floor(i / 5) * span
     }
   }
   toast('初始化按键坐标完毕');
