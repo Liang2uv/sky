@@ -6,8 +6,10 @@ var span; // 音符间的距离
 var pot = {}; // 坐标系
 var musicList; // 乐谱列表
 var musicName; // 乐谱名字
-var musicTxt; // 读取到的乐谱内容
+var musicRead = false;  // 是否正确读取到乐谱
+var musicJSON; // 读取到的乐谱内容（object）
 var musicNotes = []; // 解析完成的乐谱内容
+var floatWindow;  // 悬浮窗对象
 var t1; // 定时器t1
 var t2; // 定时器t2
 var storage = storages.create("liang_2uv@qq.com:SKY");  // 本地存储
@@ -25,29 +27,30 @@ if (!storage.contains(key_position)) {  // 没有自定义过按键坐标
   runProgram();
 }
 
-var w = floaty.window(
-  <frame gravity="center">
-      <text id="text" bg="#999999">拖我</text>
-  </frame>
-);
-w.setAdjustEnabled(true);
-
-alert('请在10秒内将悬浮窗拖动到第一个按键位置');
-
 /**
  * @method 自定义按键坐标
  */
 function customPosition() {
+  floatWindow = floaty.window(
+    <frame gravity="center">
+        <text id="text" bg="#999999">拖我</text>
+    </frame>
+  );
+  floatWindow.setAdjustEnabled(true);
+  
+  alert('请在10秒内将悬浮窗拖动到第一个按键位置');
+
   t1 = setTimeout(function() {
-    firstX = w.getX();
-    firstY = w.getY();
+    firstX = floatWindow.getX();
+    firstY = floatWindow.getY();
     alert('请在10秒内将悬浮窗拖动到第二个按键位置');
     t2 = setTimeout(function() {
-      secondX = w.getX();
-      secondY = w.getY();
+      secondX = floatWindow.getX();
+      secondY = floatWindow.getY();
       span = Math.abs(secondY - firstY);
       storage.put(key_position, { firstX: firstX, firstY: firstY, span: span });
-      w.close();
+      log({ firstX: firstX, firstY: firstY, secondX: secondX, secondY: secondY, span: span })
+      floatWindow.close();
       clearTimeout(t1);
       clearTimeout(t2);
       runProgram();
@@ -61,7 +64,7 @@ function customPosition() {
 function runProgram() {
   initPos();  // 1. 初始化按键坐标
   musicSelect();  // 2. 选择/读取乐谱
-  if (musicTxt) {
+  if (musicRead) {
     musicParse(); // 3. 解析乐谱
     sleep(500);
     play(); // 4. 演奏
@@ -96,13 +99,24 @@ function musicSelect() {
       musicName = musicList[musicIndex];
       sleep(1000);
       if (files.isFile('/sdcard/skyMusic/' + musicName)) {
-        toast('读取乐谱成功');
-        musicTxt = files.read('/sdcard/skyMusic/' + musicName);
+        var readable = files.open('/sdcard/skyMusic/' + musicName, "r", 'x-UTF-16LE-BOM');
+        var parsed = eval(readable.read())[0];
+        readable.close();
+        if(typeof(parsed.songNotes[0]) == "number" || parsed.isEncrypted) {
+					musicRead = false;
+          alert('乐谱文件已加密，无法弹奏，请更换乐谱');
+				} else {
+          toast('读取乐谱成功');
+          musicJSON = parsed;
+          musicRead = true;
+				}
       } else {
+        musicRead = false;
         alert('乐谱文件不存在, 请将乐谱文件(xxx.txt)复制到skyMusic文件夹下');
       }
     }
   } else {
+    musicRead = false;
     toast("skyMusic文件夹不存在");
     if (files.create("/sdcard/skyMusic/")) {
       alert("创建文件夹skyMusic成功，请将谱子放入该文件夹");
@@ -115,16 +129,15 @@ function musicSelect() {
  * @method 解析乐谱
  */
 function musicParse() {
-  let notes = JSON.parse(musicTxt)[0];
-  let time = notes.songNotes[0].time;
+  let time = musicJSON.songNotes[0].time;
   musicNotes.push({ time: time });
-  musicNotes.push({ keys: [Number(notes.songNotes[0].key.replace(/^(?:\d)?Key(\d{1,})$/, "$1"))] });
-  for(let i = 1; i < notes.songNotes.length; i++) {
-    let key = Number(notes.songNotes[i].key.replace(/^(?:\d)?Key(\d{1,})$/, "$1"));
-    if (notes.songNotes[i].time === notes.songNotes[i - 1].time) {  // 同时按下
+  musicNotes.push({ keys: [Number(musicJSON.songNotes[0].key.replace(/^(?:\d)?Key(\d{1,})$/, "$1"))] });
+  for(let i = 1; i < musicJSON.songNotes.length; i++) {
+    let key = Number(musicJSON.songNotes[i].key.replace(/^(?:\d)?Key(\d{1,})$/, "$1"));
+    if (musicJSON.songNotes[i].time === musicJSON.songNotes[i - 1].time) {  // 同时按下
       musicNotes[musicNotes.length - 1].keys.push(key);
     } else {
-      musicNotes.push({ time: notes.songNotes[i].time - notes.songNotes[i - 1].time });
+      musicNotes.push({ time: musicJSON.songNotes[i].time - musicJSON.songNotes[i - 1].time });
       musicNotes.push({ keys: [key] });
     }
   }
