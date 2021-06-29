@@ -116,6 +116,7 @@ function musicSelect() {
             musicRead = false;
             alert('读取乐谱失败，请更换乐谱文件');
             log('读取乐谱失败，请更换乐谱文件');
+            log(error);
           }
         } else {
           musicRead = false;
@@ -190,6 +191,6 @@ function play() {
  */
 function sort(arr) {
   arr.sort(function (item1, item2) {
-    return item1.localeCompare(item2, 'zh-CN');
+    return item1.localeCompare(item2);
   });
 }
