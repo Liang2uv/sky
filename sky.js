@@ -12,7 +12,7 @@ var musicNotes = []; // 解析完成的乐谱内容
 var floatWindow;  // 悬浮窗对象
 var t1; // 定时器t1
 var t2; // 定时器t2
-var storage = storages.create("liang_2uv@qq.com:SKY");  // 本地存储
+var storage = storages.create('liang_2uv@qq.com:SKY');  // 本地存储
 var key_position = 'POSITION';  // 存储位置信息的key
 
 alert('弹奏脚本仅供娱乐和欣赏，请勿在【正规场合】弹奏(装逼)，使用过程中遇到问题请联系开发者 —— 光遇·脚滑');
@@ -49,7 +49,7 @@ function customPosition() {
       secondY = floatWindow.getY();
       span = Math.abs(secondX - firstX);
       storage.put(key_position, { firstX: firstX, firstY: firstY, span: span });
-      log({ firstX: firstX, firstY: firstY, secondX: secondX, secondY: secondY, span: span })
+      log({ firstX: firstX, firstY: firstY, secondX: secondX, secondY: secondY, span: span });
       floatWindow.close();
       clearTimeout(t1);
       clearTimeout(t2);
@@ -90,38 +90,50 @@ function initPos() {
  * @method 选择/读取乐谱
  */
 function musicSelect() {
-  if (files.isDir("/sdcard/skyMusic/")) {
+  if (files.isDir('/sdcard/skyMusic/')) {
     musicList = files.listDir('/sdcard/skyMusic/', function (name) {
-      return name.endsWith(".txt") && files.isFile(files.join('/sdcard/skyMusic/', name));
+      return name.endsWith('.txt') && files.isFile(files.join('/sdcard/skyMusic/', name));
     });
-    let musicIndex = dialogs.select("请选择乐谱", musicList);
-    if (musicIndex >= 0) {
-      musicName = musicList[musicIndex];
-      sleep(1000);
-      if (files.isFile('/sdcard/skyMusic/' + musicName)) {
-        var readable = files.open('/sdcard/skyMusic/' + musicName, "r", 'x-UTF-16LE-BOM');
-        var parsed = eval(readable.read())[0];
-        readable.close();
-        if(typeof(parsed.songNotes[0]) == "number" || parsed.isEncrypted) {
-					musicRead = false;
-          alert('乐谱文件已加密，无法弹奏，请更换乐谱');
-				} else {
-          toast('读取乐谱成功');
-          musicJSON = parsed;
-          musicRead = true;
-				}
+    if (musicList.length !== 0) {
+      let musicIndex = dialogs.select('请选择乐谱', musicList);
+      if (musicIndex >= 0) {
+        musicName = musicList[musicIndex];
+        if (files.isFile('/sdcard/skyMusic/' + musicName)) {
+          var readable = files.open('/sdcard/skyMusic/' + musicName, 'r', 'x-UTF-16LE-BOM');
+          var parsed = eval(readable.read())[0];
+          readable.close();
+          if(typeof(parsed.songNotes[0]) == 'number' || parsed.isEncrypted) {
+            musicRead = false;
+            alert('乐谱文件已加密，无法弹奏，请更换乐谱');
+          } else {
+            toast('读取乐谱成功');
+            musicJSON = parsed;
+            musicRead = true;
+          }
+        } else {
+          musicRead = false;
+          alert('乐谱文件不存在, 请将乐谱文件(xxx.txt)复制到skyMusic文件夹下');
+        }
       } else {
         musicRead = false;
-        alert('乐谱文件不存在, 请将乐谱文件(xxx.txt)复制到skyMusic文件夹下');
+        toast('已取消选择');
       }
+    } else {
+      musicRead = false;
+      alert('查询不到乐谱文件，请将乐谱文件放在skyMusic目录下');
+      log('查询不到乐谱文件，请将乐谱文件放在skyMusic目录下');
     }
   } else {
     musicRead = false;
-    toast("skyMusic文件夹不存在");
-    if (files.create("/sdcard/skyMusic/")) {
-      alert("创建文件夹skyMusic成功，请将谱子放入该文件夹");
-    } else
-      console.error("创建文件夹失败");
+    toast('skyMusic文件夹不存在');
+    log('skyMusic文件夹不存在')
+    if (files.create('/sdcard/skyMusic/')) {
+      alert('创建文件夹skyMusic成功，请将谱子放入该文件夹');
+      log('创建文件夹skyMusic成功，请将谱子放入该文件夹');
+    } else {
+      alert('创建文件夹失败，请在根目录手动创建文件夹skyMusic');
+      log('创建文件夹失败');
+    }
   }
 }
 
@@ -131,9 +143,9 @@ function musicSelect() {
 function musicParse() {
   let time = musicJSON.songNotes[0].time;
   musicNotes.push({ time: time });
-  musicNotes.push({ keys: [Number(musicJSON.songNotes[0].key.replace(/^(?:\d)?Key(\d{1,})$/, "$1"))] });
+  musicNotes.push({ keys: [Number(musicJSON.songNotes[0].key.replace(/^(?:\d)?Key(\d{1,})$/, '$1'))] });
   for(let i = 1; i < musicJSON.songNotes.length; i++) {
-    let key = Number(musicJSON.songNotes[i].key.replace(/^(?:\d)?Key(\d{1,})$/, "$1"));
+    let key = Number(musicJSON.songNotes[i].key.replace(/^(?:\d)?Key(\d{1,})$/, '$1'));
     if (musicJSON.songNotes[i].time === musicJSON.songNotes[i - 1].time) {  // 同时按下
       musicNotes[musicNotes.length - 1].keys.push(key);
     } else {
