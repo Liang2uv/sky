@@ -4,7 +4,7 @@ var isPlay = false;  // 是否可以弹奏乐谱
 var musicDir = '/sdcard/skyMusic/'; // 乐谱文件存放目录
 var musicList; // 乐谱列表
 var musicName; // 乐谱名字
-var musicIndex = 0; // 选择的乐谱下标
+var musicIndex = -1; // 选择的乐谱下标
 var musicJSON; // 读取到的乐谱内容（object）
 var musicNotes = []; // 解析完成的乐谱内容
 
@@ -105,9 +105,10 @@ function musicItems() {
  */
 function musicSelect() {
   isPlay = false;
+  musicIndex = -1;
   if (!musicList.length) { return; }
   do {
-    musicIndex = dialogs.singleChoice('请选择乐谱', musicList, musicIndex);
+    musicIndex = dialogs.select('请选择乐谱', musicList);
   } while(musicIndex < 0);
   musicName = musicList[musicIndex];
   if (!files.isFile(musicDir + musicName)) { tip('乐谱文件不存在, 请将乐谱文件(xxx.txt)复制到skyMusic文件夹下', 'alert'); return; }
@@ -162,7 +163,8 @@ function speedSelect() {
  */
 function play() {
   if (!isPlay) { return; }
-  tip('即将为您弹奏《' + musicName.substr(0, musicName.indexOf('.txt')) + '》（' + speed + '倍速）', 'alert');
+  let ret = dialogs.confirm('提示', '即将为您弹奏《' + musicName.substr(0, musicName.indexOf('.txt')) + '》（' + speed + '倍速）');
+  if (!ret) { return; }
   for (let i = 0; i < musicNotes.length; i++) {
     let v = musicNotes[i];
     if (v.keys) {
