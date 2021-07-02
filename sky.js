@@ -6,7 +6,7 @@ var musicList; // 乐谱列表
 var musicName; // 乐谱名字
 var musicIndex = -1; // 选择的乐谱下标
 var musicJSON; // 读取到的乐谱内容（object）
-var musicNotes = []; // 解析完成的乐谱内容
+var musicNotes; // 解析完成的乐谱内容
 
 var speed_list = [0.2, 0.4, 0.6, 0.8, 1, 1.5, 1.8, 2]; // 弹奏速度
 var speed = 1;  // 弹奏速度
@@ -107,9 +107,8 @@ function musicSelect() {
   isPlay = false;
   musicIndex = -1;
   if (!musicList.length) { return; }
-  do {
-    musicIndex = dialogs.select('请选择乐谱', musicList);
-  } while(musicIndex < 0);
+  musicIndex = dialogs.select('请选择乐谱', musicList);
+  if (musicIndex < 0) { exit(); }
   musicName = musicList[musicIndex];
   if (!files.isFile(musicDir + musicName)) { tip('乐谱文件不存在, 请将乐谱文件(xxx.txt)复制到skyMusic文件夹下', 'alert'); return; }
   try {
@@ -121,6 +120,7 @@ function musicSelect() {
     } else {
       tip('读取乐谱成功');
       musicJSON = parsed;
+      log(musicName);
       isPlay = true;
     }
   } catch (error) {
@@ -133,6 +133,7 @@ function musicSelect() {
  */
 function musicParse() {
   if (!isPlay) { return; }
+  musicNotes = [];
   let time = musicJSON.songNotes[0].time;
   musicNotes.push({ time: time });
   musicNotes.push({ keys: [Number(musicJSON.songNotes[0].key.replace(/^(?:\d)?Key(\d{1,})$/, '$1'))] });
