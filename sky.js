@@ -172,7 +172,7 @@ function play() {
       let gestureMap = [];
       for (let keyIndex = 0; keyIndex < v.keys.length; keyIndex++) {
         let k = v.keys[keyIndex];
-        gestureMap.push([0, 5, [pos[k].x, pos[k].y], [pos[k].x, pos[k].y]]);
+        gestureMap.push([0, 40, [pos[k].x, pos[k].y], [pos[k].x, pos[k].y]]);
       }
       let gestureStr = JSON.stringify(gestureMap);
       eval('gestures(' + gestureStr.substr(1, gestureStr.length - 2) + ');');
@@ -221,3 +221,4 @@ function tip(text, type) {
   }
   log(text);
 }
+
