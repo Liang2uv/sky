@@ -23,7 +23,7 @@ var storage_key = 'POSITION';  // 存储位置信息的key
  * @method 自执行函数（主函数入口）
  */
 (function() {
-  tip('弹奏脚本仅供娱乐和欣赏，请勿在【正规场合】弹奏(装逼)，使用过程中遇到问题请联系开发者 —— 光遇·脚滑', 'alert');
+  tip('弹奏脚本仅供娱乐和欣赏，请勿在【正规场合】弹奏(装逼)，使用过程中遇到问题请联系开发者v:Liang2uv —— 光遇·脚滑', 'alert');
   storage = storages.create(storage_name);
   if (!storage.contains(storage_key)) {  // 没有自定义过按键坐标
     customPosition();
