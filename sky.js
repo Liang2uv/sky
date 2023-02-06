@@ -265,7 +265,11 @@ function exit() {
 function f_posOpen() {
   if (f_pos) { return; }
   f_pos = floaty.window(
-    <frame id="board" gravity="center" bg="#44ffcc00"/>
+    <frame id="board" gravity="center" bg="#44ffcc00">
+      <vertical w="*" h="*" gravity="center">
+        <text color="#ffffff" gravity="center" w="*">请将本区域与全部琴键区域重叠</text>
+      </vertical>
+    </frame>
   );
   f_pos.board.setVisibility(4);
   f_pos.setSize(playW * 1.5, playH * 1.5);
