@@ -170,8 +170,8 @@ function f_authOpen() {
       </vertical>
     </frame>
   );
-  f_auth.setSize(1200, 600);
-  f_auth.setPosition((device.height - 1200) / 2, 80);
+  f_auth.setSize(device.height - 700, device.width - 100);
+  f_auth.setPosition(350, 50);
   f_auth.pass.on("key", function(keyCode, event){
     if(event.getAction() == event.ACTION_DOWN && keyCode == keys.back){
         f_auth.disableFocus();
