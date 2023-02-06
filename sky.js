@@ -2,6 +2,7 @@ var pos; // 坐标系
 var f_pos;  // 定位悬浮窗对象
 var f_btn;  // 按钮悬浮窗对象
 var f_auth; // 权限提示悬浮窗
+var f_select; // 乐谱选择
 
 var isPlay = false;  // 是否可以弹奏乐谱
 var playing = false;  // 是否正在弹奏乐谱
@@ -55,6 +56,7 @@ importClass(android.view.WindowManager);
   eventListen();
   f_tbnOpen();
   f_posOpen();
+  f_selectOpen();
   f_authOpen();
   while(true) {}
 })();
@@ -73,7 +75,7 @@ function eventListen() {
     });
     eventSub.on('playing', function() {
       if (isPlay) {
-        dialogs.confirm('提示', '即将练习《' + musicName.substr(0, musicName.indexOf('.txt')) + '》', (ret) => {
+        dialogs.confirm('提示', '即将练习《' + musicName + '》', (ret) => {
           if (ret) {
             keyIndex = 0;
             playing = true;
@@ -160,7 +162,7 @@ function f_authOpen() {
     <frame id="board"  bg="#ffffffff">
       <vertical padding="15 15 15 0">
         <text paddingBottom="20" textSize="17sp" textColor="#fffc5532" text="请加我wx: Liang2uv 支付 ¥15 获取密钥" gravity="center"/>
-        <input id="pass" hint="请输入密钥" textColorHint="#ffbbbbbb" singleLine="true" focusable="true"/>
+        <input id="pass" hint="请输入密钥" textColorHint="#ffbbbbbb" android:imeOptions="actionDone" singleLine="true" focusable="true"/>
         <horizontal paddingTop="10" gravity="right">
           <text id="exit" size="16sp" color="#454545">退出</text>
           <text layout_weight="1"></text>
@@ -172,12 +174,6 @@ function f_authOpen() {
   );
   f_auth.setSize(device.height - 700, device.width - 100);
   f_auth.setPosition(350, 50);
-  f_auth.pass.on("key", function(keyCode, event){
-    if(event.getAction() == event.ACTION_DOWN && keyCode == keys.back){
-        f_auth.disableFocus();
-        event.consumed = true;
-    }
-  });
   f_auth.pass.on("touch_down", ()=>{
     f_auth.requestFocus();
     f_auth.pass.requestFocus();
@@ -226,6 +222,7 @@ function f_tbnOpen() {
       </ScrollView>
     </frame>
   );
+  f_btn.setPosition(0, 0);
   f_btn.btn_exit.click(function() {
     exit();
   });
@@ -258,6 +255,89 @@ function f_tbnOpen() {
       eventSub.emit('posOpen');
     }
   });
+}
+
+function f_selectOpen() {
+  f_select = floaty.rawWindow(
+    <frame id="board" w="*" h="*" gravity="center">
+      <vertical w="{{ device.height / 2 }}px" height="{{ device.width - 160 }}px" bg="#ffffffff">
+        <horizontal id="search" w="*" padding="15 5 15 5" bg="#ffefefef">
+          <text id="btnExit" textSize="15sp" textColor="#ff0f9086">取消</text>
+          <input id="input" layout_weight="1" marginLeft="10" marginRight="10" hint="输入关键词" textColorHint="#ffbbbbbb" android:imeOptions="actionDone" singleLine="true" focusable="true"></input>
+          <text id="btnSearch" textSize="15sp" textColor="#ff0f9086">搜索</text>
+        </horizontal>
+        <list id="list">
+          <horizontal padding="10"><text textSize="15sp" textColor="#ff666666" text="{{this.name}}"></text></horizontal>
+        </list>
+      </vertical>
+    </frame>
+  );
+  f_select.setSize(-1, -1);
+  f_select.board.setVisibility(8);
+  f_select.setTouchable(false);
+  f_select.board.on('touch_down', () => {
+    f_select.board.setVisibility(8);
+    f_select.setTouchable(false);
+  });
+  f_select.input.on("touch_down", ()=> {
+    f_select.requestFocus();
+    f_select.input.requestFocus();
+  });
+  f_select.btnExit.click(function() {
+    f_select.board.setVisibility(8);
+    f_select.setTouchable(false);
+  });
+  f_select.btnSearch.click(function() {
+    let keyword = f_select.input.getText().toString().trim();
+    f_select.list.setDataSource(musicList.filter(v => {
+      if (!keyword) {
+        return true;
+      }
+      return v.indexOf(keyword) > -1;
+    }).map(v => ({ name: v })));
+  });
+  f_select.list.on("item_click", function(item, itemView) {
+    if (!files.isFile(musicDir + item.name + '.txt')) { tip('乐谱文件不存在, 请将乐谱文件(xxx.txt)复制到skyMusic文件夹下', 'alert'); return; }
+    try {
+      let readable = files.open(musicDir + item.name + '.txt', 'r', 'x-UTF-16LE-BOM');
+      let parsed = eval(readable.read())[0];
+      readable.close();
+      if(typeof(parsed.songNotes[0]) == 'number' || parsed.isEncrypted) {
+        tip('乐谱文件已加密，无法弹奏，请更换乐谱', 'alert');
+      } else {
+        tip('读取乐谱成功');
+        musicJSON = parsed;
+        musicName = item.name;
+        log(item.name);
+        isPlay = true;
+        f_select.board.setVisibility(8);
+        f_select.setTouchable(false);
+        eventSub.emit('musicParse');
+      }
+    } catch (err) {
+      try {
+        let readable = files.open(musicDir + item.name + '.txt', 'r', 'UTF-8');
+        let parsed = eval(readable.read())[0];
+        readable.close();
+        if(typeof(parsed.songNotes[0]) == 'number' || parsed.isEncrypted) {
+          tip('乐谱文件已加密，无法弹奏，请更换乐谱', 'alert');
+        } else {
+          tip('读取乐谱成功');
+          musicJSON = parsed;
+          musicName = item.name;
+          log(item.name);
+          isPlay = true;
+          f_select.board.setVisibility(8);
+          f_select.setTouchable(false);
+          eventSub.emit('musicParse');
+        }
+      } catch (error) {
+        log(error)
+        tip('读取乐谱失败，请更换乐谱文件', 'alert');
+      }
+    }
+  });
+  f_select.list.setDataSource(musicList.map(v => ({ name: v })));
 }
 
 function exit() {
@@ -308,7 +388,7 @@ function f_posOpen() {
   if (files.isDir(musicDir)) {
     musicList = files.listDir(musicDir, function (name) {
       return name.endsWith('.txt') && files.isFile(files.join(musicDir, name));
-    });
+    }).map(v => v.replace(/.txt$/, ''));
     sort(musicList);
     if (!musicList.length) {
       tip('查询不到乐谱文件，请将乐谱文件放在skyMusic目录下', 'alert');
@@ -330,46 +410,8 @@ function f_posOpen() {
   isPlay = false;
   musicIndex = -1;
   if (!musicList.length) { return; }
-  dialogs.select('请选择乐谱', musicList, (musicIndex) => {
-    log(musicIndex)
-    if (musicIndex < 0) {
-      return;
-    }
-    musicName = musicList[musicIndex];
-    if (!files.isFile(musicDir + musicName)) { tip('乐谱文件不存在, 请将乐谱文件(xxx.txt)复制到skyMusic文件夹下', 'alert'); return; }
-    try {
-      let readable = files.open(musicDir + musicName, 'r', 'x-UTF-16LE-BOM');
-      let parsed = eval(readable.read())[0];
-      readable.close();
-      if(typeof(parsed.songNotes[0]) == 'number' || parsed.isEncrypted) {
-        tip('乐谱文件已加密，无法弹奏，请更换乐谱', 'alert');
-      } else {
-        tip('读取乐谱成功');
-        musicJSON = parsed;
-        log(musicName);
-        isPlay = true;
-        eventSub.emit('musicParse');
-      }
-    } catch (err) {
-      try {
-        let readable = files.open(musicDir + musicName, 'r', 'UTF-8');
-        let parsed = eval(readable.read())[0];
-        readable.close();
-        if(typeof(parsed.songNotes[0]) == 'number' || parsed.isEncrypted) {
-          tip('乐谱文件已加密，无法弹奏，请更换乐谱', 'alert');
-        } else {
-          tip('读取乐谱成功');
-          musicJSON = parsed;
-          log(musicName);
-          isPlay = true;
-          eventSub.emit('musicParse');
-        }
-      } catch (error) {
-        log(error)
-        tip('读取乐谱失败，请更换乐谱文件', 'alert');
-      }
-    }
-  });
+  f_select.board.setVisibility(0);
+  f_select.setTouchable(true);
 }
 
 /**
