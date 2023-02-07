@@ -23,6 +23,7 @@ var playW = 1061;  // 弹奏框宽度
 var playH = 616;  // 弹奏框高度
 var keySize = 171;  // 按键大小
 var spanSize = 51.5; // 按键间隔
+var posExt = 70;  // 悬浮窗定位需要额外减去的宽度和高度
 
 var eventSub;
 
@@ -39,6 +40,7 @@ importClass(android.view.inputmethod.EditorInfo);
  */
 (function() {
   tip('弹奏脚本仅供娱乐和欣赏，请勿在【正规场合】弹奏(装逼)，使用过程中遇到问题请联系开发者wx:Liang2uv —— 光遇·六六', 'alert');
+  posInit();
   musicItems(); // 1. 获取乐谱列表
   if (!this.musicList.length) { return; }
   storage = storages.create(storage_name);
@@ -61,6 +63,17 @@ importClass(android.view.inputmethod.EditorInfo);
   f_authOpen();
   while(true) {}
 })();
+
+function posInit() {
+  let radio = device.width / 1080;
+  x = Math.ceil(x * radio);
+  y = Math.ceil(y * radio);
+  playW = Math.ceil(playW * radio);
+  playH = Math.ceil(playH * radio);
+  keySize = Math.ceil(keySize * radio);
+  spanSize = Math.ceil(spanSize * radio);
+  posExt = Math.ceil(posExt * radio);
+}
 
 function eventListen() {
   if (!eventSub) {
@@ -129,8 +142,8 @@ function eventListen() {
     eventSub.on('posFinish', function() {
       x = f_pos.getX();
       y = f_pos.getY();
-      playW = f_pos.getWidth() - 70;
-      playH = f_pos.getHeight() - 70;
+      playW = f_pos.getWidth() - posExt;
+      playH = f_pos.getHeight() - posExt;
       let ret = divideTwoCellOnce(3, 2, playH, 5, 4, playW);
       keySize = ret.x;
       spanSize = ret.y;
