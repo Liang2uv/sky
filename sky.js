@@ -32,6 +32,7 @@ var storage_key = 'POSITION';  // 存储位置信息的key
 var isAuth = false;
 
 importClass(android.view.WindowManager);
+importClass(android.view.inputmethod.EditorInfo);
 
 /**
  * @method 自执行函数（主函数入口）
@@ -261,13 +262,13 @@ function f_selectOpen() {
   f_select = floaty.rawWindow(
     <frame id="board" w="*" h="*" gravity="center">
       <vertical w="{{ device.height / 2 }}px" height="{{ device.width - 160 }}px" bg="#ffffffff">
-        <horizontal id="search" w="*" padding="15 5 15 5" bg="#ffefefef">
-          <text id="btnExit" textSize="15sp" textColor="#ff0f9086">取消</text>
-          <input id="input" layout_weight="1" marginLeft="10" marginRight="10" hint="输入关键词" textColorHint="#ffbbbbbb" android:imeOptions="actionDone" singleLine="true" focusable="true"></input>
-          <text id="btnSearch" textSize="15sp" textColor="#ff0f9086">搜索</text>
+        <horizontal id="search" w="*" bg="#ffefefef">
+          <text id="btnSearch" padding="15" textSize="15sp" textColor="#ff0f9086">搜索</text>
+          <input id="input" inputType="text" layout_weight="1" hint="输入关键词" textColorHint="#ffbbbbbb" android:imeOptions="actionDone" singleLine="true" focusable="true" focusableInTouchMode="true"></input>
+          <text id="btnClear" padding="15" textSize="15sp" textColor="#ff0f9086">清除</text>
         </horizontal>
-        <list id="list">
-          <horizontal padding="10"><text textSize="15sp" textColor="#ff666666" text="{{this.name}}"></text></horizontal>
+        <list id="list" w="*">
+          <horizontal padding="10" w="*"><text textSize="15sp" textColor="#ff666666" text="{{this.name}}" w="*"></text></horizontal>
         </list>
       </vertical>
     </frame>
@@ -276,16 +277,32 @@ function f_selectOpen() {
   f_select.board.setVisibility(8);
   f_select.setTouchable(false);
   f_select.board.on('touch_down', () => {
+    f_select.input.clearFocus();
+    f_select.disableFocus();
     f_select.board.setVisibility(8);
     f_select.setTouchable(false);
   });
+  f_select.input.setOnEditorActionListener(new android.widget.TextView.OnEditorActionListener((view, i, event) => {
+    switch (i) {
+      case EditorInfo.IME_ACTION_DONE:
+        let keyword = f_select.input.getText().toString().trim();
+        f_select.list.setDataSource(musicList.filter(v => {
+          if (!keyword) {
+            return true;
+          }
+          return v.indexOf(keyword) > -1;
+        }).map(v => ({ name: v })));
+        f_select.input.clearFocus();
+        f_select.disableFocus();
+        return false;
+      default:
+        return true;
+    }
+    
+  }));
   f_select.input.on("touch_down", ()=> {
     f_select.requestFocus();
     f_select.input.requestFocus();
-  });
-  f_select.btnExit.click(function() {
-    f_select.board.setVisibility(8);
-    f_select.setTouchable(false);
   });
   f_select.btnSearch.click(function() {
     let keyword = f_select.input.getText().toString().trim();
@@ -295,6 +312,13 @@ function f_selectOpen() {
       }
       return v.indexOf(keyword) > -1;
     }).map(v => ({ name: v })));
+    f_select.input.clearFocus();
+    f_select.disableFocus();
+  });
+  f_select.btnClear.click(function() {
+    if (!f_select.input.getText().toString()) { return; }
+    f_select.input.setText('');
+    f_select.list.setDataSource(musicList.map(v => ({ name: v })));
   });
   f_select.list.on("item_click", function(item, itemView) {
     if (!files.isFile(musicDir + item.name + '.txt')) { tip('乐谱文件不存在, 请将乐谱文件(xxx.txt)复制到skyMusic文件夹下', 'alert'); return; }
@@ -327,6 +351,8 @@ function f_selectOpen() {
           musicName = item.name;
           log(item.name);
           isPlay = true;
+          f_select.input.clearFocus();
+          f_select.disableFocus();
           f_select.board.setVisibility(8);
           f_select.setTouchable(false);
           eventSub.emit('musicParse');
@@ -464,20 +490,17 @@ function play() {
 function auth() {
   try {
     device.getAndroidId();
-    const obj = storage.get(storage_key);
-    if (!obj || !obj.authAuto) {
-      isAuth = false;
-      f_auth.board.setVisibility(0);
-      let parentParent = f_auth.board.parent.parent.parent;
-      setTouchable(parentParent, true);
-    } else {
-      isAuth = true;
-    }
   } catch (error) {
     log('请在系统设置中开启auto.js的“访问设备信息”权限');
-    alert('获取设备信息失败', '请在设置中开启auto.js的“访问设备信息”权限', function() {
-      exit();
-    });
+  }
+  const obj = storage.get(storage_key);
+  if (!obj || !obj.authAuto) {
+    isAuth = false;
+    f_auth.board.setVisibility(0);
+    let parentParent = f_auth.board.parent.parent.parent;
+    setTouchable(parentParent, true);
+  } else {
+    isAuth = true;
   }
 }
 
