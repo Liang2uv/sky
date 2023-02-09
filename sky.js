@@ -39,7 +39,7 @@ importClass(android.view.inputmethod.EditorInfo);
  * @method 自执行函数（主函数入口）
  */
 (function() {
-  tip('弹奏脚本仅供娱乐和欣赏，请勿在【正规场合】弹奏(装逼)，使用过程中遇到问题请联系开发者wx:Liang2uv —— 光遇·六六', 'alert');
+  tip('请开启【无障碍】【悬浮窗】【访问设备信息】三种权限，遇到问题请联系开发者wx:Liang2uv —— 光遇·六六', 'alert');
   posInit();
   musicItems(); // 1. 获取乐谱列表
   if (!this.musicList.length) { return; }

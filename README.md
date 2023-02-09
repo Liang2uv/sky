@@ -6,25 +6,31 @@
 
 ## 更新日志
 
+- 2023/02/09 打包apk
+
 - 2023/02/07 优化不同手机适配问题，添加乐谱搜索功能
 
 - 2023/02/03 添加密钥（需支付获取），开发不易，感谢支持！
 
 - 2023/02/02 添加按键功能 [选谱、暂停、定位、调速]，方便操作！
 
-## 使用
+## 安装教程
 
-1. 点击`Autojs.apk`并安装，**不要更新**！
+1. 下载安装包apk文件，[下载地址](https://github.com/Liang2uv/sky/releases)，百度云：链接：https://pan.baidu.com/s/1dvlnqAddvz5BvJS_FBSJLg 提取码：1314
 
-2. 打开Auto.js侧边栏，为Auto.js开启**无障碍服务**和**悬浮窗权限**。
+2. 在手机根目录新建文件夹`skyMusic`，将`sheets`文件夹里的所有.txt文件复制到`skyMusic`里
 
-3. 在手机根目录新建文件夹`skyMusic`，将`sheets`文件夹里的所有.txt文件复制到`skyMusic`里
+3. 运行app前请授予悬浮窗、无障碍、访问设备信息等权限
 
-4. 打开Auto.js，点击右下角的导入，导入文件`sky.js`
+## 二次开发
 
-5. 打开`光遇`，调出弹琴界面
+1. 打开Auto.js，点击右下角的导入，导入文件`sky.js`
 
-6. 在Auto.js悬浮窗中运行脚本`sky.js`
+2. 在手机根目录新建文件夹`skyMusic`，将`sheets`文件夹里的所有.txt文件复制到`skyMusic`里
+
+3. 在Auto.js悬浮窗中运行脚本`sky.js`
+
+注：本脚本只在autojs v4.1.1版本测试通过，请勿更新autojs
 
 ## 关于乐谱
 
