@@ -6,6 +6,8 @@
 
 ## 更新日志
 
+- 2023/02/15 autojs4.x版本不给用了，安装包已换成[autoxjs](https://github.com/kkevsekk1/AutoX/releases)
+
 - 2023/02/09 打包apk
 
 - 2023/02/07 优化不同手机适配问题，添加乐谱搜索功能
@@ -24,13 +26,13 @@
 
 ## 二次开发
 
-1. 打开Auto.js，点击右下角的导入，导入文件`sky.js`
+1. 安装`autoxjs_5.7.8.apk`并打开，点击右下角的导入，导入文件`sky.js`
 
 2. 在手机根目录新建文件夹`skyMusic`，将`sheets`文件夹里的所有.txt文件复制到`skyMusic`里
 
 3. 在Auto.js悬浮窗中运行脚本`sky.js`
 
-注：本脚本只在autojs v4.1.1版本测试通过，请勿更新autojs
+注：本脚本只在autoxjs v5.7.8版本测试通过，请勿更新autoxjs（安装时勾选忽略版本后退出应用就不会再提示更新）
 
 ## 关于乐谱
 
