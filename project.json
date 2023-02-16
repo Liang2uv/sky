@@ -1,0 +1,29 @@
+{
+  "assets": [],
+  "build": {
+    "build_id": "9E858700-2",
+    "build_number": 2,
+    "build_time": 1676532837995
+  },
+  "useFeatures": [],
+  "icon": "res/logo.png",
+  "launchConfig": {
+    "hideLauncher": false,
+    "hideLogs": false,
+    "displaySplash": false,
+    "serviceDesc": "",
+    "splashText": "",
+    "stableMode": false,
+    "volumeUpcontrol": false
+  },
+  "main": "main.js",
+  "name": "自动弹琴",
+  "packageName": "com.liang2uv.skyauto",
+  "scripts": {},
+  "signingConfig": {
+    "alias": "",
+    "keystore": ""
+  },
+  "versionCode": 1,
+  "versionName": "1.0.1"
+}
