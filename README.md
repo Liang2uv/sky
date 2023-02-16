@@ -36,7 +36,7 @@
 
 ## 关于乐谱
 
-1. 乐谱文件必须是未加密的.txt文件，把乐谱文件复制到`skyMusic`文件夹下就欧了
+1. 乐谱文件必须是未加密的.txt文件，把乐谱文件复制到`skyMusicAuto`文件夹下就欧了
 
 2. 在线[共享乐谱](https://github.com/StageGuard/SkyAutoPlayerScript/tree/master/shared_sheets)，有许多优质乐谱
 
