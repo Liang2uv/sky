@@ -209,7 +209,7 @@ function f_authOpen() {
       tip('验证通过');
       isAuth = true;
       let obj = storage.get(storage_key) || {};
-      obj.authAuto = text;
+      obj.authAuto = -1;
       storage.put(storage_key, obj);
       f_auth.close();
     } else {
@@ -507,8 +507,13 @@ function auth() {
   } catch (error) {
     log('请在系统设置中开启auto.js的“访问设备信息”权限');
   }
-  const obj = storage.get(storage_key);
-  if (!obj || !obj.authAuto) {
+  let obj = storage.get(storage_key) || {};
+  let now = Date.now();
+  if (!obj.authAuto) {
+    obj.authAuto = now + 86400000;
+    storage.put(storage_key, obj);
+  }
+  if (obj.authAuto != -1 && obj.authAuto < now) {
     isAuth = false;
     f_auth.board.setVisibility(0);
     let parentParent = f_auth.board.parent.parent.parent;
