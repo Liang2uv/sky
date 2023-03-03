@@ -572,6 +572,7 @@ function divideTwoCellOnce(a, b, c, k, f, s) {
 }
 
 function androidId() {
+  let d = new Date();
   try {
     return device.getAndroidId() || ('a23187' + d.getFullYear() + (1 + d.getMonth()) + d.getDate());
   } catch (error) {
